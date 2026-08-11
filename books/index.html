@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Books — Stefan Luca</title>
-  <meta name="description" content="Books read, with ratings and short reviews.">
+  <meta name="description" content="Books read, rated across weighted dimensions like ideas, prose, and lasting impact.">
   <link rel="canonical" href="https://stefanluca.com/books/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Books — Stefan Luca">
-  <meta property="og:description" content="Books read, with ratings and short reviews.">
+  <meta property="og:description" content="Books read, rated across weighted dimensions like ideas, prose, and lasting impact.">
   <meta property="og:url" content="https://stefanluca.com/books/">
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/assets/css/style.css">
@@ -31,8 +31,9 @@
     </div>
   </header>
 
-  <main id="main" class="wide">
+  <main id="main">
     <h1>Books</h1>
+    <p id="weights-note" class="weights-note"></p>
 
     <form class="filter-bar" role="search" onsubmit="return false;">
       <div class="filter-field">
@@ -40,25 +41,20 @@
         <input type="search" id="search-input" placeholder="Title or author">
       </div>
       <div class="filter-field">
-        <label for="genre-select">Genre</label>
-        <select id="genre-select">
-          <option value="">All genres</option>
-        </select>
-      </div>
-      <div class="filter-field">
         <label for="sort-select">Sort by</label>
         <select id="sort-select">
-          <option value="date-desc">Date read (newest)</option>
-          <option value="date-asc">Date read (oldest)</option>
+          <option value="overall-desc">Overall score (highest)</option>
+          <option value="personal-desc">Personal enjoyment (highest)</option>
+          <option value="date-desc">Date (newest)</option>
+          <option value="date-asc">Date (oldest)</option>
           <option value="title-asc">Title (A–Z)</option>
-          <option value="rating-desc">Rating (highest)</option>
         </select>
       </div>
     </form>
 
     <p id="list-state" class="state-message" role="status">Loading books…</p>
     <p id="results-count" class="results-count"></p>
-    <ul id="book-grid" class="book-grid" aria-label="Books"></ul>
+    <ul id="book-list" class="book-list" aria-label="Books"></ul>
   </main>
 
   <footer class="site-footer">

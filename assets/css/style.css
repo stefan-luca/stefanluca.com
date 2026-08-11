@@ -433,6 +433,12 @@ main.wide {
 
 /* Books */
 
+.weights-note {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: -0.5em 0 var(--space-3);
+}
+
 .filter-bar {
   display: flex;
   gap: var(--space-2);
@@ -471,80 +477,75 @@ main.wide {
   margin-bottom: var(--space-2);
 }
 
-.book-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--space-3);
+.book-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.book-card {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: var(--space-2);
-  background: var(--bg-elevated);
-  display: flex;
-  flex-direction: column;
-  gap: 0.4em;
+.book-item {
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border);
 }
 
-.book-cover {
-  width: 100%;
-  aspect-ratio: 2 / 3;
-  object-fit: cover;
-  border-radius: 4px;
-  background: var(--code-bg);
-  margin-bottom: 0.4em;
+.book-item:first-child {
+  border-top: 1px solid var(--border);
 }
 
-.book-cover-placeholder {
-  width: 100%;
-  aspect-ratio: 2 / 3;
-  border-radius: 4px;
-  background: var(--code-bg);
-  color: var(--text-muted);
+.book-item-header {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-serif);
-  font-size: 1.4rem;
-  margin-bottom: 0.4em;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
 }
 
 .book-title {
   font-family: var(--font-serif);
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   margin: 0;
 }
 
-.book-author,
+.book-score {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
 .book-meta {
   color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0.2em 0 0;
+}
+
+.book-breakdown {
+  margin-top: 0.6em;
+}
+
+.book-breakdown summary {
+  cursor: pointer;
   font-size: 0.85rem;
+  color: var(--accent);
+}
+
+.book-breakdown dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.3em 1em;
+  margin: 0.6em 0 0;
+  font-size: 0.9rem;
+}
+
+.book-breakdown dt {
+  color: var(--text-muted);
+}
+
+.book-breakdown dd {
   margin: 0;
-}
-
-.book-rating {
-  font-size: 0.9rem;
-  color: var(--accent);
-}
-
-.book-review {
-  font-size: 0.9rem;
-  color: var(--text);
-  margin: 0.3em 0 0;
-}
-
-.book-badge {
-  align-self: flex-start;
-  font-size: 0.7rem;
-  color: var(--accent);
-  border: 1px solid var(--accent);
-  border-radius: 999px;
-  padding: 0.1em 0.6em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 @media (max-width: 480px) {

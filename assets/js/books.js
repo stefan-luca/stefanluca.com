@@ -1,27 +1,55 @@
-// Renders the books page from a public Google Sheet, with client-side
-// sorting, genre filtering, and text search. All rendering is done via
-// textContent / created elements — no HTML from the sheet is ever injected.
+// Renders the books page from a public Google Sheet. The sheet holds a
+// per-dimension weights row, a header row, then one data row per book —
+// see assets/js/config.js for the exact layout and column names.
+//
+// All rendering goes through textContent / created elements, never
+// innerHTML, so no sheet content is ever parsed as markup.
 import { CONFIG } from "./config.js";
-import { fetchSheetRows, isTruthyCell } from "./gsheets.js";
+import { fetchSheetCsv, normalizeKey } from "./gsheets.js";
 
-const gridEl = document.getElementById("book-grid");
+const DIMENSIONS = [
+  { header: "ideasandconceptualoriginality", label: "Ideas & originality" },
+  { header: "philosophicalintellectualdepth", label: "Philosophical depth" },
+  { header: "worldbuildingandspeculativecoherence", label: "World-building" },
+  { header: "plotandstructure", label: "Plot & structure" },
+  { header: "charactersandhumaninsight", label: "Characters" },
+  { header: "proseandstyle", label: "Prose & style" },
+  { header: "emotionalimpact", label: "Emotional impact" },
+  { header: "lastingimpact", label: "Lasting impact" },
+];
+
+const listEl = document.getElementById("book-list");
 const stateEl = document.getElementById("list-state");
 const countEl = document.getElementById("results-count");
+const weightsNoteEl = document.getElementById("weights-note");
 const sortEl = document.getElementById("sort-select");
-const genreEl = document.getElementById("genre-select");
 const searchEl = document.getElementById("search-input");
 
 let books = [];
 
 async function init() {
+  let table;
   try {
-    const { rows } = await fetchSheetRows(CONFIG.booksSheetId, CONFIG.booksSheetName);
-    books = rows.filter((r) => r.title).map(normalizeBook);
+    table = await fetchSheetCsv(CONFIG.booksSheetId, CONFIG.booksSheetGid);
   } catch (err) {
     console.error(err);
     setState("Unable to load books right now. Please check back later.", true);
     return;
   }
+
+  const headerRowIndex = table.findIndex((row) => row.some((cell) => normalizeKey(cell) === "booktitle"));
+  if (headerRowIndex === -1) {
+    setState("Unable to read the books sheet — its layout may have changed.", true);
+    return;
+  }
+
+  const headers = table[headerRowIndex].map(normalizeKey);
+  const weightsRow = headerRowIndex > 0 ? table[headerRowIndex - 1] : null;
+
+  books = table
+    .slice(headerRowIndex + 1)
+    .map((row) => rowToBook(row, headers))
+    .filter((book) => book.title);
 
   if (books.length === 0) {
     setState("No books listed yet — check back soon.", false);
@@ -29,55 +57,64 @@ async function init() {
   }
 
   stateEl.hidden = true;
-  populateGenres(books);
+  renderWeightsNote(headers, weightsRow);
   bindControls();
   applyAndRender();
 }
 
-function normalizeBook(r) {
-  const ratingRaw = r.overallscore ?? r.rating ?? "";
-  const ratingNum = parseFloat(String(ratingRaw).replace(/[^\d.]/g, ""));
+function rowToBook(row, headers) {
+  const get = (headerKey) => {
+    const idx = headers.indexOf(headerKey);
+    return idx === -1 ? "" : (row[idx] || "").trim();
+  };
+
+  const dimensions = DIMENSIONS.map((d) => ({
+    label: d.label,
+    value: toNumber(get(d.header)),
+  })).filter((d) => d.value != null);
 
   return {
-    title: r.title || "",
-    author: r.author || "",
-    year: r.year || "",
-    dateRead: r.dateread || "",
-    genre: r.genre || "",
-    rating: Number.isFinite(ratingNum) ? ratingNum : null,
-    ratingLabel: ratingRaw ? String(ratingRaw) : "",
-    review: r.review || "",
-    recommended: isTruthyCell(r.recommendation),
-    coverUrl: r.coverimageurl || "",
+    title: get("booktitle"),
+    author: get("author"),
+    dateRead: get("dateread"),
+    dateReviewed: get("datereviewed"),
+    overall: toNumber(get("overall")),
+    personalEnjoyment: toNumber(get("personalenjoymentoverall")),
+    dimensions,
   };
 }
 
-function populateGenres(list) {
-  const genres = [...new Set(list.map((b) => b.genre).filter(Boolean))].sort();
-  for (const genre of genres) {
-    const option = document.createElement("option");
-    option.value = genre;
-    option.textContent = genre;
-    genreEl.appendChild(option);
+function toNumber(value) {
+  if (value === "") return null;
+  const n = parseFloat(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function renderWeightsNote(headers, weightsRow) {
+  if (!weightsNoteEl || !weightsRow) return;
+
+  const parts = DIMENSIONS.map((d) => {
+    const idx = headers.indexOf(d.header);
+    const weight = idx === -1 ? null : parseFloat(weightsRow[idx]);
+    return Number.isFinite(weight) ? `${d.label} ${Math.round(weight * 100)}%` : null;
+  }).filter(Boolean);
+
+  if (parts.length) {
+    weightsNoteEl.textContent = `"Overall" is a weighted average across dimensions: ${parts.join(" · ")}.`;
   }
 }
 
 function bindControls() {
   sortEl.addEventListener("change", applyAndRender);
-  genreEl.addEventListener("change", applyAndRender);
   searchEl.addEventListener("input", applyAndRender);
 }
 
 function applyAndRender() {
-  const genre = genreEl.value;
   const query = searchEl.value.trim().toLowerCase();
 
-  let filtered = books.filter((b) => {
-    const matchesGenre = !genre || b.genre === genre;
-    const matchesQuery =
-      !query || b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query);
-    return matchesGenre && matchesQuery;
-  });
+  let filtered = books.filter(
+    (b) => !query || b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query)
+  );
 
   filtered = sortBooks(filtered, sortEl.value);
 
@@ -87,73 +124,62 @@ function applyAndRender() {
 
 function sortBooks(list, mode) {
   const copy = [...list];
+  const dateValue = (b) => new Date(b.dateRead || b.dateReviewed || 0).getTime() || 0;
+
   switch (mode) {
     case "date-asc":
-      return copy.sort((a, b) => new Date(a.dateRead || 0) - new Date(b.dateRead || 0));
+      return copy.sort((a, b) => dateValue(a) - dateValue(b));
     case "title-asc":
       return copy.sort((a, b) => a.title.localeCompare(b.title));
-    case "rating-desc":
-      return copy.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
+    case "personal-desc":
+      return copy.sort((a, b) => (b.personalEnjoyment ?? -Infinity) - (a.personalEnjoyment ?? -Infinity));
     case "date-desc":
+      return copy.sort((a, b) => dateValue(b) - dateValue(a));
+    case "overall-desc":
     default:
-      return copy.sort((a, b) => new Date(b.dateRead || 0) - new Date(a.dateRead || 0));
+      return copy.sort((a, b) => (b.overall ?? -Infinity) - (a.overall ?? -Infinity));
   }
 }
 
 function render(list) {
-  gridEl.innerHTML = "";
+  listEl.innerHTML = "";
 
   if (list.length === 0) {
     const li = document.createElement("li");
     li.className = "state-message";
-    li.textContent = "No books match your filters.";
-    gridEl.appendChild(li);
+    li.textContent = "No books match your search.";
+    listEl.appendChild(li);
     return;
   }
 
   for (const book of list) {
-    gridEl.appendChild(renderCard(book));
+    listEl.appendChild(renderItem(book));
   }
 }
 
-function renderCard(book) {
+function renderItem(book) {
   const li = document.createElement("li");
-  li.className = "book-card";
+  li.className = "book-item";
 
-  if (book.coverUrl) {
-    const img = document.createElement("img");
-    img.className = "book-cover";
-    img.src = book.coverUrl;
-    img.alt = `Cover of ${book.title}`;
-    img.loading = "lazy";
-    img.addEventListener("error", () => {
-      img.replaceWith(coverPlaceholder(book.title));
-    });
-    li.appendChild(img);
-  } else {
-    li.appendChild(coverPlaceholder(book.title));
-  }
-
-  if (book.recommended) {
-    const badge = document.createElement("span");
-    badge.className = "book-badge";
-    badge.textContent = "Recommended";
-    li.appendChild(badge);
-  }
+  const header = document.createElement("div");
+  header.className = "book-item-header";
 
   const title = document.createElement("p");
   title.className = "book-title";
   title.textContent = book.title;
-  li.appendChild(title);
+  header.appendChild(title);
 
-  if (book.author) {
-    const author = document.createElement("p");
-    author.className = "book-author";
-    author.textContent = book.author;
-    li.appendChild(author);
+  if (book.overall != null) {
+    const score = document.createElement("span");
+    score.className = "book-score";
+    score.title = "Overall score";
+    score.textContent = formatScore(book.overall);
+    header.appendChild(score);
   }
 
-  const metaParts = [book.genre, book.year].filter(Boolean);
+  li.appendChild(header);
+
+  const metaParts = [book.author, formatDateLabel(book)].filter(Boolean);
   if (metaParts.length) {
     const meta = document.createElement("p");
     meta.className = "book-meta";
@@ -161,29 +187,52 @@ function renderCard(book) {
     li.appendChild(meta);
   }
 
-  if (book.ratingLabel) {
-    const rating = document.createElement("p");
-    rating.className = "book-rating";
-    rating.textContent = book.rating != null ? `★ ${book.ratingLabel}` : book.ratingLabel;
-    li.appendChild(rating);
+  if (book.personalEnjoyment != null) {
+    const personal = document.createElement("p");
+    personal.className = "book-meta";
+    personal.textContent = `Personal enjoyment: ${formatScore(book.personalEnjoyment)}`;
+    li.appendChild(personal);
   }
 
-  if (book.review) {
-    const review = document.createElement("p");
-    review.className = "book-review";
-    review.textContent = book.review;
-    li.appendChild(review);
+  if (book.dimensions.length) {
+    const details = document.createElement("details");
+    details.className = "book-breakdown";
+
+    const summary = document.createElement("summary");
+    summary.textContent = "Rating breakdown";
+    details.appendChild(summary);
+
+    const dl = document.createElement("dl");
+    for (const d of book.dimensions) {
+      const dt = document.createElement("dt");
+      dt.textContent = d.label;
+      const dd = document.createElement("dd");
+      dd.textContent = formatScore(d.value);
+      dl.appendChild(dt);
+      dl.appendChild(dd);
+    }
+    details.appendChild(dl);
+
+    li.appendChild(details);
   }
 
   return li;
 }
 
-function coverPlaceholder(title) {
-  const div = document.createElement("div");
-  div.className = "book-cover-placeholder";
-  div.setAttribute("aria-hidden", "true");
-  div.textContent = (title || "?").trim().charAt(0).toUpperCase();
-  return div;
+function formatScore(n) {
+  return Number.isInteger(n) ? String(n) : n.toFixed(2);
+}
+
+function formatDateLabel(book) {
+  if (book.dateRead) return `Read ${formatDate(book.dateRead)}`;
+  if (book.dateReviewed) return `Reviewed ${formatDate(book.dateReviewed)}`;
+  return "";
+}
+
+function formatDate(value) {
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return value;
+  return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 }
 
 function setState(message, isError) {

@@ -36,8 +36,8 @@
 // for a request to `${blogContentEndpoint}?slug=my-post`.
 
 export const CONFIG = {
-  booksSheetId: "YOUR_BOOKS_SHEET_ID",
-  booksSheetName: "Books",
+  booksSheetId: "1-qDnH5USIArDEhbRvo46Qw2b2G-WQf5glJDklyOv-Cg",
+  booksSheetGid: 0,
 
   blogSheetId: "YOUR_BLOG_SHEET_ID",
   blogSheetName: "Posts",

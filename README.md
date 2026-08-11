@@ -42,20 +42,36 @@ Then open `http://localhost:8000`.
 
 ## Books (Google Sheets)
 
-1. Create a Google Sheet with a header row and one row per book. Recognized
-   column headers (case/spacing-insensitive): `Title`, `Author`, `Year`,
-   `Date Read`, `Genre`, `Rating`, `Overall Score`, `Review`,
-   `Recommendation`, `Cover Image URL`.
-2. **File → Share → General access → "Anyone with the link" (Viewer).**
-   Only put data in this sheet you're comfortable being publicly readable —
-   anyone with the sheet ID can query it directly, not just through the
-   site.
-3. Copy the sheet ID from its URL (`.../d/<SHEET_ID>/edit`) and the tab name,
-   and set `booksSheetId` / `booksSheetName` in `assets/js/config.js`.
+Data comes from a live sheet:
+<https://docs.google.com/spreadsheets/d/1-qDnH5USIArDEhbRvo46Qw2b2G-WQf5glJDklyOv-Cg/edit>
+(`booksSheetId` / `booksSheetGid` in `assets/js/config.js`), shared as
+"Anyone with the link" (Viewer). It's fetched as CSV (`fetchSheetCsv` in
+`assets/js/gsheets.js`) rather than the gviz JSON endpoint, because gviz
+infers a type per column from the data and silently drops header text it
+can't parse as that type — which happens on this sheet's numeric rating
+columns.
 
-Missing fields degrade gracefully (no cover → initial placeholder, no
-rating → rating line omitted, etc.). Sorting and genre/text filtering run
-client-side in `assets/js/books.js`.
+Sheet layout, top to bottom:
+
+1. A **weights row** — one weight per rating dimension (must sum to 1.0),
+   e.g. `0.2, 0.2, 0.15, 0.15, 0.1, 0.1, 0.05, 0.05`.
+2. A **header row**: `Book title`, `Author`, `Date read`, `Date reviewed`,
+   `Ideas and conceptual originality`, `Philosophical / intellectual depth`,
+   `World building and speculative coherence`, `Plot and structure`,
+   `Characters and human insight`, `Prose and style`, `Emotional impact`,
+   `Lasting impact`, `Overall`, `Personal enjoyment / overall`.
+3. One **data row per book**. `Overall` and `Personal enjoyment` are
+   expected to already be computed in the sheet (e.g. `Overall` as the
+   weighted average of the eight dimension scores using the weights row).
+
+`assets/js/books.js` locates the header row by scanning for a
+`Book title` cell (so extra rows above it, like the weights row, are fine),
+reads the weights row immediately above it to build the "Overall is a
+weighted average of…" note at the top of the page, and treats every row
+below the header as a book. Missing values degrade gracefully — a book
+with no `Personal enjoyment` value just omits that line, dimensions with no
+score are left out of its "Rating breakdown". Sorting (by Overall, personal
+enjoyment, date, or title) and text search (title/author) run client-side.
 
 ## Blog metadata (Google Sheets)
 
