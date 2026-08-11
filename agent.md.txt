@@ -1,0 +1,218 @@
+# AGENTS.md
+
+## Project
+This repository powers the personal website at:
+
+https://stefanluca.com
+
+It is hosted on GitHub Pages and deployed automatically from the `main` branch.
+
+## Deployment constraints
+Treat this as a static frontend website.
+
+You may use:
+- HTML
+- CSS
+- client-side JavaScript
+- static assets
+- client-side charts and visualisations
+- public browser-accessible APIs
+- Google Sheets / Google Apps Script endpoints intended for public website use
+- static-site generation if it outputs GitHub Pages-compatible files
+
+Do NOT assume the server can run:
+- Node.js
+- Python
+- PHP
+- Express
+- Flask
+- Django
+- server-side API routes
+- persistent server processes
+- cron jobs
+- server-side sessions
+
+Do not introduce a backend unless explicitly requested.
+
+## Security
+Never place secrets in frontend code or commit them to this repository.
+
+Do not expose:
+- API secret keys
+- Google service-account credentials
+- OAuth client secrets
+- database passwords
+- private tokens
+- Anthropic/OpenAI secret keys
+- personal/private datasets
+
+Assume all files deployed through GitHub Pages are publicly accessible.
+
+If a requested feature requires secrets or private server-side logic, flag it before implementation and propose an external backend such as Google Apps Script, Cloudflare Workers, Vercel Functions, Supabase, or Firebase.
+
+## Site purpose
+This is Stefan Luca's personal website.
+
+Main sections should include:
+
+1. Home
+   - concise personal introduction
+   - selected experience
+   - education
+   - current interests / areas of work
+   - links to major sections
+
+2. Resume
+   - professional experience
+   - education
+   - projects / leadership
+   - downloadable PDF resume if provided
+   - do not invent facts, dates, metrics, employers, titles, or achievements
+
+3. Blog
+   - article listing page
+   - article detail pages
+   - blog content should be sourced from Google Docs or a Google Apps Script publishing endpoint
+   - blog metadata may be sourced from Google Sheets
+   - support title, date, description, tags, slug, and published state
+   - unpublished drafts must never appear publicly
+
+4. Books
+   - book review / reading page
+   - data sourced from Google Sheets
+   - support sorting and filtering
+   - design for fields such as:
+     - title
+     - author
+     - year
+     - date read
+     - genre
+     - ratings
+     - overall score
+     - review
+     - recommendation
+     - cover image URL
+   - handle missing values gracefully
+
+## Design principles
+Aim for:
+- clean
+- minimal
+- intellectually serious
+- modern
+- highly readable
+- understated rather than flashy
+- responsive on mobile and desktop
+- fast-loading
+
+Prefer strong typography, whitespace, restrained animation, and simple navigation.
+
+Avoid:
+- excessive gradients
+- generic startup-style UI
+- overuse of cards
+- unnecessary animations
+- clutter
+- overly playful visuals unless specifically requested
+
+## Technical quality
+- use semantic HTML
+- ensure responsive layouts
+- use accessible contrast
+- include alt text for meaningful images
+- support keyboard navigation where practical
+- avoid unnecessary dependencies
+- avoid large JS bundles when plain JavaScript is sufficient
+- keep URLs stable
+- make external data failures degrade gracefully
+- show useful loading and error states for fetched content
+
+## SEO / metadata
+Each major page should have:
+- unique title
+- meta description
+- canonical URL where appropriate
+- Open Graph metadata
+- sensible heading hierarchy
+
+Include:
+- sitemap.xml
+- robots.txt
+- favicon support
+
+Do not add analytics or tracking without explicit approval.
+
+## Git workflow
+Before making changes:
+1. inspect the existing repository
+2. understand the current structure and styling
+3. preserve working functionality unless replacing it intentionally
+
+For changes:
+- keep commits focused
+- use descriptive commit messages
+- do not overwrite unrelated user changes
+- do not force-push
+- do not rewrite Git history unless explicitly asked
+
+The production branch is `main`.
+
+Changes pushed to `main` may immediately deploy to the live website, so avoid experimental or broken code on `main`.
+
+For larger changes, prefer:
+1. create a feature branch
+2. implement
+3. test locally
+4. review differences
+5. merge into `main`
+
+## Content accuracy
+Do not invent personal information about Stefan.
+
+If content is not already present in the repository or explicitly supplied, use a clear placeholder rather than fabricating details.
+
+Preserve exact employer names, university names, dates, titles, and quantitative achievements when supplied.
+
+## Google content integrations
+
+### Google Sheets
+For publicly displayed content such as book reviews:
+- fetch only data intended to be public
+- do not require private credentials in browser JavaScript
+- isolate data-fetching logic from rendering logic
+- validate and sanitize fetched values
+- handle unavailable or malformed responses gracefully
+
+### Blog / Google Docs
+Preferred architecture:
+
+Google Docs
+→ Google Apps Script publishing endpoint
+→ website frontend
+
+Do not embed private Google credentials in the site.
+
+Use a stable slug system for posts.
+
+The blog index should ideally be driven by structured metadata rather than scraping arbitrary Google Docs.
+
+## Local development
+The site should remain easy to preview locally.
+
+Do not require a complex build process unless there is a clear benefit.
+
+If introducing tooling, document:
+- installation
+- local run command
+- build command
+- deployment assumptions
+
+## Before completing a task
+Check:
+- page loads without console errors
+- navigation works
+- mobile layout works
+- external data failures do not break the whole page
+- no secrets are committed
+- links and asset paths work under GitHub Pages
+- the site works at the custom domain

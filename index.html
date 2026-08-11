@@ -4,43 +4,96 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stefan Luca</title>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      color: #222;
-
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      min-height: 100vh;
-    }
-
-    .container {
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 48px;
-      margin-bottom: 10px;
-    }
-
-    p {
-      font-size: 20px;
-      color: #666;
-    }
-  </style>
+  <meta name="description" content="Personal site of Stefan Luca — background, writing, and reading notes.">
+  <link rel="canonical" href="https://stefanluca.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Stefan Luca">
+  <meta property="og:description" content="Personal site of Stefan Luca — background, writing, and reading notes.">
+  <meta property="og:url" content="https://stefanluca.com/">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/css/style.css">
 </head>
-
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
 
-  <div class="container">
-    <h1>Stefan Luca</h1>
-    <p>Website is live 🎉</p>
-  </div>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-title" href="/">Stefan Luca</a>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+      <nav class="site-nav" id="site-nav" aria-label="Primary">
+        <ul>
+          <li><a href="/" aria-current="page">Home</a></li>
+          <li><a href="/resume/">Resume</a></li>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/books/">Books</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
+  <main id="main">
+    <section class="hero">
+      <h1>Stefan Luca</h1>
+      <!-- TODO: replace with a real one-line professional summary -->
+      <p class="tagline placeholder">[One-line professional tagline — e.g. field, focus area, or current role]</p>
+
+      <div class="hero-links">
+        <a class="btn btn-primary" href="/resume/">View résumé</a>
+        <a class="btn" href="/blog/">Read the blog</a>
+        <a class="btn" href="/books/">Browse books</a>
+      </div>
+    </section>
+
+    <section>
+      <h2>About</h2>
+      <!-- TODO: replace with a real 2–4 sentence introduction -->
+      <p class="placeholder">
+        [Short introduction — who you are, what you work on, and what you're
+        currently interested in. Keep it to a few sentences.]
+      </p>
+    </section>
+
+    <section>
+      <h2>Selected experience</h2>
+      <!-- TODO: replace with real roles, pulled from resume/index.html -->
+      <div class="entry">
+        <div class="entry-header">
+          <p class="entry-title placeholder">[Role title] · [Organization]</p>
+          <span class="entry-meta placeholder">[Start] – [End]</span>
+        </div>
+        <p class="entry-subtitle placeholder">[One line on scope or impact]</p>
+      </div>
+      <div class="entry">
+        <div class="entry-header">
+          <p class="entry-title placeholder">[Role title] · [Organization]</p>
+          <span class="entry-meta placeholder">[Start] – [End]</span>
+        </div>
+        <p class="entry-subtitle placeholder">[One line on scope or impact]</p>
+      </div>
+      <p><a href="/resume/">Full résumé →</a></p>
+    </section>
+
+    <section>
+      <h2>Education</h2>
+      <!-- TODO: replace with real education entries -->
+      <div class="entry">
+        <div class="entry-header">
+          <p class="entry-title placeholder">[Degree, Field] · [Institution]</p>
+          <span class="entry-meta placeholder">[Year]</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>&copy; <span id="year">2026</span> Stefan Luca</p>
+      <p><a href="https://github.com/stefan-luca" rel="noopener" target="_blank">GitHub</a></p>
+    </div>
+  </footer>
+
+  <script src="/assets/js/nav.js"></script>
+  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
 </body>
 </html>

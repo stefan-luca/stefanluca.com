@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Books — Stefan Luca</title>
+  <meta name="description" content="Books read, with ratings and short reviews.">
+  <link rel="canonical" href="https://stefanluca.com/books/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Books — Stefan Luca">
+  <meta property="og:description" content="Books read, with ratings and short reviews.">
+  <meta property="og:url" content="https://stefanluca.com/books/">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-title" href="/">Stefan Luca</a>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+      <nav class="site-nav" id="site-nav" aria-label="Primary">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/resume/">Resume</a></li>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/books/" aria-current="page">Books</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wide">
+    <h1>Books</h1>
+
+    <form class="filter-bar" role="search" onsubmit="return false;">
+      <div class="filter-field">
+        <label for="search-input">Search</label>
+        <input type="search" id="search-input" placeholder="Title or author">
+      </div>
+      <div class="filter-field">
+        <label for="genre-select">Genre</label>
+        <select id="genre-select">
+          <option value="">All genres</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="sort-select">Sort by</label>
+        <select id="sort-select">
+          <option value="date-desc">Date read (newest)</option>
+          <option value="date-asc">Date read (oldest)</option>
+          <option value="title-asc">Title (A–Z)</option>
+          <option value="rating-desc">Rating (highest)</option>
+        </select>
+      </div>
+    </form>
+
+    <p id="list-state" class="state-message" role="status">Loading books…</p>
+    <p id="results-count" class="results-count"></p>
+    <ul id="book-grid" class="book-grid" aria-label="Books"></ul>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>&copy; <span id="year">2026</span> Stefan Luca</p>
+      <p><a href="https://github.com/stefan-luca" rel="noopener" target="_blank">GitHub</a></p>
+    </div>
+  </footer>
+
+  <script src="/assets/js/nav.js"></script>
+  <script type="module" src="/assets/js/books.js"></script>
+  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>
