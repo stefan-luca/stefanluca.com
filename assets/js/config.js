@@ -6,15 +6,19 @@
 // API key, service-account credential, or OAuth secret here.
 //
 // --- Books ---
-// 1. Create a Google Sheet with a header row and one row per book.
-// 2. File > Share > General access > "Anyone with the link" (Viewer).
-// 3. Copy the Sheet ID from its URL:
-//    https://docs.google.com/spreadsheets/d/<SHEET_ID>/edit
-// 4. Set booksSheetId below. booksSheetName is the tab name (bottom of screen).
+// Sheet shared as "Anyone with the link" (Viewer), read via CSV export
+// (see fetchSheetCsv in gsheets.js — the gviz JSON endpoint loses header
+// text on this sheet because it infers numeric/date column types).
+// booksSheetGid is the tab's gid (the number after "gid=" in its URL; the
+// first tab is 0).
 //
-// Recognized column headers (case/spacing-insensitive): Title, Author, Year,
-// Date Read, Genre, Rating, Overall Score, Review, Recommendation,
-// Cover Image URL.
+// Expected layout: a row of per-dimension weights, then a header row, then
+// one data row per book. Recognized headers (case/spacing-insensitive):
+// Book title, Author, Date read, Date reviewed, Ideas and conceptual
+// originality, Philosophical / intellectual depth, World building and
+// speculative coherence, Plot and structure, Characters and human insight,
+// Prose and style, Emotional impact, Lasting impact, Overall, Personal
+// enjoyment / overall. See assets/js/books.js for the exact mapping.
 //
 // --- Blog metadata ---
 // Same setup as Books, on a separate sheet/tab. Recognized headers: Title,

@@ -10,7 +10,7 @@
  * lookup key ("dateread", "overallscore").
  * @param {string} label
  */
-function normalizeKey(label) {
+export function normalizeKey(label) {
   return String(label || "")
     .trim()
     .toLowerCase()
@@ -83,4 +83,84 @@ function parseGvizResponse(text) {
 export function isTruthyCell(value) {
   const v = String(value ?? "").trim().toLowerCase();
   return v === "true" || v === "yes" || v === "y" || v === "1" || v === "published";
+}
+
+/**
+ * Fetch a public Google Sheet tab as raw CSV rows (array of string arrays,
+ * no header interpretation). Prefer this over `fetchSheetRows` when a
+ * sheet has extra rows above its header (e.g. category weights) or numeric
+ * columns whose header text would otherwise get lost: the gviz JSON
+ * endpoint infers a type per column from the data and silently nulls out
+ * any header cell it can't parse as that type (e.g. a text label sitting
+ * above a column of numbers).
+ *
+ * @param {string} sheetId
+ * @param {number|string} [gid] sheet/tab id (0 for the first tab)
+ * @returns {Promise<string[][]>}
+ */
+export async function fetchSheetCsv(sheetId, gid = 0) {
+  if (!sheetId || sheetId.startsWith("YOUR_")) {
+    throw new Error("Sheet is not configured yet.");
+  }
+
+  const url =
+    `https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheetId)}` +
+    `/export?format=csv&gid=${encodeURIComponent(gid)}`;
+
+  const response = await fetch(url, { credentials: "omit" });
+  if (!response.ok) {
+    throw new Error(`Sheet request failed (${response.status}).`);
+  }
+
+  return parseCsv(await response.text());
+}
+
+/**
+ * Minimal RFC 4180 CSV parser: handles quoted fields, embedded commas,
+ * escaped quotes (""), and quoted newlines.
+ * @param {string} text
+ * @returns {string[][]}
+ */
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let field = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    if (inQuotes) {
+      if (char === '"' && text[i + 1] === '"') {
+        field += '"';
+        i++;
+      } else if (char === '"') {
+        inQuotes = false;
+      } else {
+        field += char;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inQuotes = true;
+    } else if (char === ",") {
+      row.push(field);
+      field = "";
+    } else if (char === "\n") {
+      row.push(field);
+      rows.push(row);
+      row = [];
+      field = "";
+    } else if (char !== "\r") {
+      field += char;
+    }
+  }
+
+  if (field.length > 0 || row.length > 0) {
+    row.push(field);
+    rows.push(row);
+  }
+
+  return rows;
 }
